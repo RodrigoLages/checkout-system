@@ -5,7 +5,6 @@ let prisma: PrismaClient;
 if (process.env.NODE_ENV === "production") {
   prisma = new PrismaClient();
 } else {
-  // Directly cast global as any, then assign and retrieve prisma property
   if (!(global as any).prisma) {
     (global as any).prisma = new PrismaClient();
   }

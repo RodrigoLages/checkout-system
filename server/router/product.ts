@@ -4,7 +4,7 @@ import { z } from "zod";
 import prisma from "@/prisma/prisma";
 
 export const productRouter = router({
-  createProduct: procedure
+  create: procedure
     .input(
       z.object({
         name: z.string(),
@@ -20,12 +20,12 @@ export const productRouter = router({
       return product;
     }),
 
-  getProducts: procedure.query(async () => {
+  get: procedure.query(async () => {
     const products = await prisma.product.findMany();
     return products;
   }),
 
-  getProductById: procedure.input(z.string()).query(async ({ input }) => {
+  getById: procedure.input(z.string()).query(async ({ input }) => {
     const product = await prisma.product.findUnique({
       where: { id: input },
     });
@@ -35,7 +35,7 @@ export const productRouter = router({
     return product;
   }),
 
-  updateProduct: procedure
+  update: procedure
     .input(
       z.object({
         id: z.string(),
@@ -54,7 +54,7 @@ export const productRouter = router({
       return product;
     }),
 
-  deleteProduct: procedure.input(z.string()).mutation(async ({ input }) => {
+  delete: procedure.input(z.string()).mutation(async ({ input }) => {
     const product = await prisma.product.delete({
       where: { id: input },
     });

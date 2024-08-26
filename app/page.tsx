@@ -17,8 +17,8 @@ export default function Home() {
       <SideBar />
       <div className="flex-1 flex flex-col">
         <header className="h-16 bg-white border-b border-gray-300 flex items-center px-4"></header>
-        <div className="flex-1 p-4">
-          <div className="flex items-center  p-4 space-x-5">
+        <div className="flex-1 p-4 overflow-y-auto">
+          <div className="flex items-center p-4 space-x-5">
             <h1 className="text-gray-800 text-2xl font-semibold">Produtos</h1>
             <button
               onClick={() => setIsModalOpen(true)}

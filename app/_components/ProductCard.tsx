@@ -1,7 +1,9 @@
 "use client";
+import { useState } from "react";
 import { trpc } from "../_trpc/client";
 import type { AppRouter } from "@/server";
 import type { inferRouterOutputs } from "@trpc/server";
+import ProductModal from "./ProductModal";
 
 type Product = inferRouterOutputs<AppRouter>["product"]["get"][number];
 
@@ -13,6 +15,8 @@ export default function ProductCard({
   refetch: () => void;
 }) {
   const deleteProduct = trpc.product.delete.useMutation({ onSettled: refetch });
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div className="w-full max-w-xs bg-white rounded-lg border border-gray-300 shadow-md overflow-hidden">
@@ -33,7 +37,10 @@ export default function ProductCard({
         </div>
       </div>
       <div className="flex justify-between p-4">
-        <button className="bg-yellow-500 text-white py-2 px-4 rounded-md text-sm font-semibold">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="bg-yellow-500 text-white py-2 px-4 rounded-md text-sm font-semibold"
+        >
           Editar
         </button>
         <button
@@ -43,6 +50,12 @@ export default function ProductCard({
           Excluir
         </button>
       </div>
+      <ProductModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        refetch={refetch}
+        productToEdit={product}
+      />
     </div>
   );
 }

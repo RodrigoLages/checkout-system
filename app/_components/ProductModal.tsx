@@ -1,12 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import type { AppRouter } from "@/server";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { trpc } from "../_trpc/client";
 
 type NewProduct = inferRouterInputs<AppRouter>["product"]["create"];
 type Product = inferRouterOutputs<AppRouter>["product"]["getById"];
-
 
 type ModalProps = {
   isOpen: boolean;
@@ -15,12 +14,22 @@ type ModalProps = {
   productToEdit?: Product | null;
 };
 
-export default function ProductModal({ isOpen, onClose, refetch, productToEdit }: ModalProps) {
+export default function ProductModal({
+  isOpen,
+  onClose,
+  refetch,
+  productToEdit,
+}: ModalProps) {
   const createProduct = trpc.product.create.useMutation({ onSettled: refetch });
   const updateProduct = trpc.product.update.useMutation({ onSettled: refetch });
   const [productName, setProductName] = useState(productToEdit?.name || "");
-  const [description, setDescription] = useState(productToEdit?.description || "");
-  const [image, setImage] = useState(productToEdit?.image || "foo");
+  const [description, setDescription] = useState(
+    productToEdit?.description || ""
+  );
+  const [image, setImage] = useState<string | undefined>(
+    productToEdit?.image || undefined
+  );
+  //const [file, setFile] = useState<File | null>(null);
   const [price, setPrice] = useState(productToEdit?.price || 0);
 
   useEffect(() => {
@@ -37,7 +46,7 @@ export default function ProductModal({ isOpen, onClose, refetch, productToEdit }
     const product: NewProduct = {
       name: productName,
       description,
-      image,
+      image: image || "nope",
       price,
     };
 
@@ -48,22 +57,29 @@ export default function ProductModal({ isOpen, onClose, refetch, productToEdit }
     }
 
     onClose();
-    //resetValues();
   };
 
   const handleOutsideClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
-      //resetValues();
     }
   };
 
-  const resetValues = () => {
-    setProductName("");
-    setDescription("");
-    setImage("");
-    setPrice(0);
-  }
+  // const onChangePicture = (e: ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.currentTarget.files && e.currentTarget.files[0];
+  //   if (file) {
+  //     if (file.size / 1024 / 1024 > 50) {
+  //       return alert("File size too big (max 50MB)");
+  //     } else {
+  //       setFile(file);
+  //       const reader = new FileReader();
+  //       reader.onload = (e) => {
+  //         //setData((prev) => ({ ...prev, image: e.target?.result as string }));
+  //       };
+  //       reader.readAsDataURL(file);
+  //     }
+  //   }
+  // };
 
   if (!isOpen) return null;
 
@@ -71,16 +87,16 @@ export default function ProductModal({ isOpen, onClose, refetch, productToEdit }
     <div
       onClick={handleOutsideClick}
       className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center"
-     >
+    >
       <div className="w-[408px] h-auto relative bg-white rounded-sm border border-white p-6">
-        <h2 className="text-[#1e1e1e] text-xl font-semibold font-['Inter'] mb-4">
+        <h2 className="text-[#1e1e1e] text-xl font-semibold mb-4">
           {productToEdit ? "Editar Produto" : "Criar produto"}
         </h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label
               htmlFor="productName"
-              className="block text-[#888888] text-sm font-normal font-['Inter']"
+              className="block text-[#888888] text-sm font-normal"
             >
               Nome do produto
             </label>
@@ -99,7 +115,7 @@ export default function ProductModal({ isOpen, onClose, refetch, productToEdit }
           <div className="mb-4">
             <label
               htmlFor="description"
-              className="block text-[#888888] text-sm font-normal font-['Inter']"
+              className="block text-[#888888] text-sm font-normal"
             >
               Descrição
             </label>
@@ -118,7 +134,7 @@ export default function ProductModal({ isOpen, onClose, refetch, productToEdit }
           <div className="mb-4">
             <label
               htmlFor="thumbnail"
-              className="block text-[#888888] text-sm font-normal font-['Inter']"
+              className="block text-[#888888] text-sm font-normal"
             >
               Thumbnail
             </label>
@@ -127,11 +143,13 @@ export default function ProductModal({ isOpen, onClose, refetch, productToEdit }
                 type="file"
                 id="thumbnail"
                 name="thumbnail"
+                accept="image/*"
+                src={undefined}
                 onChange={(e) => alert("WIP")}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
               <div className="w-full h-full bg-[#f8f8f8] rounded-sm border border-[#039adc] flex items-center justify-center">
-                <span className="text-[#039adc] text-sm font-normal font-['Inter']">
+                <span className="text-[#039adc] text-sm font-normal">
                   Upload
                 </span>
               </div>
@@ -141,7 +159,7 @@ export default function ProductModal({ isOpen, onClose, refetch, productToEdit }
           <div className="mb-4">
             <label
               htmlFor="price"
-              className="block text-[#888888] text-sm font-normal font-['Inter']"
+              className="block text-[#888888] text-sm font-normal"
             >
               Preço
             </label>
@@ -152,7 +170,9 @@ export default function ProductModal({ isOpen, onClose, refetch, productToEdit }
               step="0.01"
               placeholder="R$ 00.00"
               value={price || ""}
-              onChange={(e) => setPrice(parseFloat(parseFloat(e.target.value).toFixed(2)))}
+              onChange={(e) =>
+                setPrice(parseFloat(parseFloat(e.target.value).toFixed(2)))
+              }
               required
               className="w-full h-10 rounded-sm border border-[#e9e9e9] pl-4 text-[#a0a0a0] mt-2"
             />

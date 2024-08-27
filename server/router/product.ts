@@ -1,4 +1,3 @@
-// src/trpc/product.ts
 import { procedure, router } from "../trpc";
 import { z } from "zod";
 import prisma from "@/prisma/prisma";

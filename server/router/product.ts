@@ -1,6 +1,7 @@
 import { procedure, router } from "../trpc";
 import { z } from "zod";
 import prisma from "@/prisma/prisma";
+import deleteBlob from "@/util/deleteBlob";
 
 export const productRouter = router({
   create: procedure
@@ -45,12 +46,21 @@ export const productRouter = router({
       })
     )
     .mutation(async ({ input }) => {
+      const prev = await prisma.product.findUnique({
+        where: { id: input.id }
+      });
+      
+      if (!prev) throw new Error("Product not found");
       const product = await prisma.product.update({
         where: { id: input.id },
         data: {
           ...input,
         },
       });
+
+      if (prev.image !== product.image) {
+        deleteBlob(prev.image);
+      }
       return product;
     }),
 
@@ -58,6 +68,7 @@ export const productRouter = router({
     const product = await prisma.product.delete({
       where: { id: input },
     });
+    deleteBlob(product.image);
     return product;
   }),
 });

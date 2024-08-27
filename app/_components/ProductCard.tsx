@@ -22,7 +22,7 @@ export default function ProductCard({
     <div className="w-full max-w-xs bg-white rounded-lg border border-gray-300 shadow-md overflow-hidden">
       <img
         className="w-full h-40 object-cover"
-        src="https://via.placeholder.com/253x153"
+        src={product.image}
         alt={product.name}
       />
       <div className="p-4">

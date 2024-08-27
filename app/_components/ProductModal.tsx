@@ -3,6 +3,7 @@ import { useState, useEffect, ChangeEvent } from "react";
 import type { AppRouter } from "@/server";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { trpc } from "../_trpc/client";
+import sendImage from "@/util/sendImage";
 
 type NewProduct = inferRouterInputs<AppRouter>["product"]["create"];
 type Product = inferRouterOutputs<AppRouter>["product"]["getById"];
@@ -23,14 +24,11 @@ export default function ProductModal({
   const createProduct = trpc.product.create.useMutation({ onSettled: refetch });
   const updateProduct = trpc.product.update.useMutation({ onSettled: refetch });
   const [productName, setProductName] = useState(productToEdit?.name || "");
-  const [description, setDescription] = useState(
-    productToEdit?.description || ""
-  );
-  const [image, setImage] = useState<string | undefined>(
-    productToEdit?.image || undefined
-  );
-  //const [file, setFile] = useState<File | null>(null);
+  const [description, setDescription] = useState(productToEdit?.description || "");
   const [price, setPrice] = useState(productToEdit?.price || 0);
+  const [image, setImage] = useState(productToEdit?.image || "");
+  const [file, setFile] = useState<File | null>(null);
+  const [data, setData] = useState<{ image: string | null }>({ image: null })
 
   useEffect(() => {
     if (productToEdit) {
@@ -41,14 +39,19 @@ export default function ProductModal({
     }
   }, [productToEdit]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const product: NewProduct = {
       name: productName,
       description,
-      image: image || "nope",
+      image,
       price,
     };
+    if (file) {
+      const url = await sendImage(file);
+      if (!url) return;
+      product.image = url;
+    }
 
     if (productToEdit) {
       updateProduct.mutate({ ...product, id: productToEdit.id });
@@ -65,21 +68,22 @@ export default function ProductModal({
     }
   };
 
-  // const onChangePicture = (e: ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.currentTarget.files && e.currentTarget.files[0];
-  //   if (file) {
-  //     if (file.size / 1024 / 1024 > 50) {
-  //       return alert("File size too big (max 50MB)");
-  //     } else {
-  //       setFile(file);
-  //       const reader = new FileReader();
-  //       reader.onload = (e) => {
-  //         //setData((prev) => ({ ...prev, image: e.target?.result as string }));
-  //       };
-  //       reader.readAsDataURL(file);
-  //     }
-  //   }
-  // };
+  const onChangePicture = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.currentTarget.files && e.currentTarget.files[0];
+    if (file) {
+      if (file.size / 1024 / 1024 > 50) {
+        return alert("File size too big (max 50MB)");
+      } else {
+        setFile(file);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setData((prev) => ({ ...prev, image: e.target?.result as string }));
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  };
+  
 
   if (!isOpen) return null;
 
@@ -144,14 +148,19 @@ export default function ProductModal({
                 id="thumbnail"
                 name="thumbnail"
                 accept="image/*"
-                src={undefined}
-                onChange={(e) => alert("WIP")}
+                onChange={onChangePicture}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
               <div className="w-full h-full bg-[#f8f8f8] rounded-sm border border-[#039adc] flex items-center justify-center">
-                <span className="text-[#039adc] text-sm font-normal">
-                  Upload
-                </span>
+                {data.image || image ? (
+                  <img
+                    src={data.image || image}
+                    alt="Thumbnail Preview"
+                    className="w-full h-full object-cover rounded-sm"
+                  />
+                ) : (
+                  <span className="text-[#039adc] text-sm font-normal">Upload</span>
+                )}
               </div>
             </div>
           </div>

@@ -1,7 +1,7 @@
 import { procedure, router } from "../trpc";
 import { z } from "zod";
 import prisma from "@/prisma/prisma";
-import deleteBlob from "@/util/deleteBlob";
+import { deleteBlob } from "@/util/blobFunctions";
 
 export const productRouter = router({
   create: procedure

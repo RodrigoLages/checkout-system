@@ -3,7 +3,6 @@ import { useState, useEffect, ChangeEvent } from "react";
 import type { AppRouter } from "@/server";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { trpc } from "../_trpc/client";
-import sendImage from "@/util/sendImage";
 
 type NewProduct = inferRouterInputs<AppRouter>["product"]["create"];
 type Product = inferRouterOutputs<AppRouter>["product"]["getById"];
@@ -23,6 +22,7 @@ export default function ProductModal({
 }: ModalProps) {
   const createProduct = trpc.product.create.useMutation({ onSettled: refetch });
   const updateProduct = trpc.product.update.useMutation({ onSettled: refetch });
+  const uploadImage = trpc.upload.sendImage.useMutation();
   const [productName, setProductName] = useState(productToEdit?.name || "");
   const [description, setDescription] = useState(
     productToEdit?.description || ""
@@ -50,7 +50,7 @@ export default function ProductModal({
       price,
     };
     if (file) {
-      const url = await sendImage(file);
+      const url = await handleFileUpload(file);
       if (!url) return;
       product.image = url;
     }
@@ -63,6 +63,38 @@ export default function ProductModal({
 
     onClose();
   };
+
+  const handleFileUpload = async (file: File): Promise<string | null> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+  
+      reader.onload = async () => {
+        const base64String = reader.result?.toString().split(',')[1];
+  
+        if (base64String) {
+          const filename = file.name;
+  
+          try {
+            const url = await uploadImage.mutateAsync({ file: base64String, filename });
+            resolve(url);
+          } catch (error) {
+            console.error("Error uploading image:", error);
+            reject(null);
+          }
+        } else {
+          reject(null);
+        }
+      };
+  
+      reader.onerror = (error) => {
+        console.error("Error reading file:", error);
+        reject(null);
+      };
+  
+      reader.readAsDataURL(file);
+    });
+  };
+  
 
   const handleOutsideClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {

@@ -24,11 +24,13 @@ export default function ProductModal({
   const createProduct = trpc.product.create.useMutation({ onSettled: refetch });
   const updateProduct = trpc.product.update.useMutation({ onSettled: refetch });
   const [productName, setProductName] = useState(productToEdit?.name || "");
-  const [description, setDescription] = useState(productToEdit?.description || "");
+  const [description, setDescription] = useState(
+    productToEdit?.description || ""
+  );
   const [price, setPrice] = useState(productToEdit?.price || 0);
   const [image, setImage] = useState(productToEdit?.image || "");
   const [file, setFile] = useState<File | null>(null);
-  const [data, setData] = useState<{ image: string | null }>({ image: null })
+  const [data, setData] = useState<{ image: string | null }>({ image: null });
 
   useEffect(() => {
     if (productToEdit) {
@@ -83,7 +85,6 @@ export default function ProductModal({
       }
     }
   };
-  
 
   if (!isOpen) return null;
 
@@ -159,7 +160,9 @@ export default function ProductModal({
                     className="w-full h-full object-cover rounded-sm"
                   />
                 ) : (
-                  <span className="text-[#039adc] text-sm font-normal">Upload</span>
+                  <span className="text-[#039adc] text-sm font-normal">
+                    Upload
+                  </span>
                 )}
               </div>
             </div>

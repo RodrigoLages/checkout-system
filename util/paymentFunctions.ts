@@ -40,7 +40,7 @@ const placeholder : PaymentData = {
 }
 }
 
-async function createPayment(paymentData: PaymentData) {
+export async function createPayment(paymentData: PaymentData | null) {
   try {
     const pagamentoData = placeholder
     pagamentoData.notification_url = `${NEXT_PUBLIC_BASE_URL}/api/trpc/payment.webhook?source_news=webhooks`
@@ -62,7 +62,7 @@ async function createPayment(paymentData: PaymentData) {
       point_of_interaction.transaction_data.qr_code_base64
     );
 
-    return id;
+    return { id, point_of_interaction };
   } catch (error: any) {
     console.error(
       "Erro ao criar pagamento:",

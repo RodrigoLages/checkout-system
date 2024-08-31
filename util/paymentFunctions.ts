@@ -25,10 +25,10 @@ type PaymentData = {
   };
 };
 
-const placeholder : PaymentData = {
-  transaction_amount: 100.0,
+const placeholder: PaymentData = {
+  transaction_amount: 5.0,
   description: "Compra Teste",
-  payment_method_id: "Pix",
+  payment_method_id: "pix",
   payer: {
     email: "email_teste@exemplo.com",
     first_name: "Nome",
@@ -36,14 +36,15 @@ const placeholder : PaymentData = {
     identification: {
       type: "CPF",
       number: "01234567890",
+    },
   },
-}
-}
+};
 
 export async function createPayment(paymentData: PaymentData | null) {
   try {
-    const pagamentoData = placeholder
-    pagamentoData.notification_url = `${NEXT_PUBLIC_BASE_URL}/api/trpc/payment.webhook?source_news=webhooks`
+    const pagamentoData = placeholder;
+    pagamentoData.notification_url = `${NEXT_PUBLIC_BASE_URL}/api/trpc/payment.webhook?source_news=webhooks`;
+    console.log(pagamentoData.notification_url);
 
     const respostaPagamento = await api.post("/payments", pagamentoData, {
       headers: {

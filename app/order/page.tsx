@@ -5,7 +5,6 @@ import { trpc } from "../_trpc/client";
 export default function Order() {
   const getOrders = trpc.order.getAll.useQuery();
   const orders = getOrders.data;
-  console.log(orders);
 
   return (
     <main className="flex h-screen overflow-hidden bg-gray-100">
@@ -37,9 +36,9 @@ export default function Order() {
                   </span>
                   <span>{order.product.name}</span>
                   <span>{order.customerName}</span>
-                  <span>{order.product.price}</span>
+                  <span>R$ {order.product.price.toFixed(2)}</span>
                   <span>
-                    {order.status == "APPROVED" ? "Pago" : "Pendente"}
+                    {order.status === "APPROVED" ? "Pago" : "Pendente"}
                   </span>
                   <span>{order.customerCPF}</span>
                   <span>{order.customerEmail}</span>

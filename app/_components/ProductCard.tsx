@@ -19,7 +19,7 @@ export default function ProductCard({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div className="w-full max-w-xs bg-white rounded-lg border border-gray-300 shadow-md overflow-hidden">
+    <div className="w-full max-w-md bg-white rounded-lg border border-gray-300 shadow-md overflow-hidden">
       <img
         className="w-full h-40 object-cover"
         src={product.image}
@@ -29,9 +29,14 @@ export default function ProductCard({
         <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
         <div className="mt-2 text-gray-600 text-sm">
           <div className="bg-blue-100 text-blue-600 p-2 rounded-md border border-blue-300">
-            <div className="text-sm font-normal">Link de checkout</div>
-            <a href="#" className="block text-blue-600 text-sm mt-1">
-              link.com
+            <div className="text-sm font-normal">Link de checkout:</div>
+            <a
+              href={`/checkout/${product.id}`}
+              className="block text-blue-600 text-sm mt-1 truncate"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {`${process.env.NEXT_PUBLIC_BASE_URL}/checkout/${product.id}`}
             </a>
           </div>
         </div>

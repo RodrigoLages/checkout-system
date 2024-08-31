@@ -16,15 +16,15 @@ export const paymentRouter = router({
         action: z.string(),
         data: z.object({ id: z.string() }),
       })
-    ).mutation(async ({ input }) => {
-      console.log("foooi")
-      console.log(input)
+    )
+    .mutation(async ({ input }) => {
+      console.log("entrou no webhook");
+      console.log(input);
       return;
     }),
 
-  test: procedure
-    .query(async () => {
-      const data = await createPayment(null);
-      return data;
-    })
+  test: procedure.query(async () => {
+    const data = await createPayment(null);
+    return data;
+  }),
 });

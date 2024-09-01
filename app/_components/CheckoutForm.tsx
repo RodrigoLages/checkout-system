@@ -56,7 +56,7 @@ export default function ChekoutForm({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (transactionData) setIsModalOpen(true);
+    if (transactionData) return setIsModalOpen(true);
     if (!isValidCPF(orderData.customerCPF)) {
       return alert("Insira um CPF válido");
     }

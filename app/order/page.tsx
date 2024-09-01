@@ -32,7 +32,10 @@ export default function Order() {
               </div>
               <div className="bg-white rounded-b-lg shadow-md border">
                 {orders?.map((order) => (
-                  <div className="grid grid-cols-7 py-2 px-4 border-b border-[#e0e0e0] text-[#595959] text-sm">
+                  <div
+                    key={order.id}
+                    className="grid grid-cols-7 py-2 px-4 border-b border-[#e0e0e0] text-[#595959] text-sm"
+                  >
                     <span>
                       {new Date(order.createdAt).toLocaleDateString("pt-BR")}
                     </span>

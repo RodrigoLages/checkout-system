@@ -22,9 +22,4 @@ export const paymentRouter = router({
       console.log(input);
       return;
     }),
-
-  verify: procedure.input(z.string()).query(async ({ input }) => {
-    const data = await verificarPagamento(input);
-    return data;
-  }),
 });

@@ -1,6 +1,7 @@
 import { procedure, router } from "../trpc";
 import { z } from "zod";
 import prisma from "@/prisma/prisma";
+import { createPayment } from "@/util/paymentFunctions";
 
 export const orderRouter = router({
   create: procedure
@@ -19,7 +20,9 @@ export const orderRouter = router({
       const order = await prisma.order.create({
         data: input,
       });
-      return order;
+
+      const transaction_data = await createPayment(input);
+      return { ...order, transaction_data };
     }),
 
   getAll: procedure.query(async () => {

@@ -1,7 +1,7 @@
 import { procedure, router } from "../trpc";
 import { boolean, z } from "zod";
 import prisma from "@/prisma/prisma";
-import { createPayment } from "@/util/paymentFunctions";
+import { createPayment, verificarPagamento } from "@/util/paymentFunctions";
 
 export const paymentRouter = router({
   webhook: procedure
@@ -23,8 +23,8 @@ export const paymentRouter = router({
       return;
     }),
 
-  test: procedure.query(async () => {
-    const data = await createPayment(null);
+  verify: procedure.input(z.string()).query(async ({ input }) => {
+    const data = await verificarPagamento(input);
     return data;
   }),
 });

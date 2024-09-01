@@ -1,11 +1,16 @@
 "use client";
-import { useState, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
+import { useRouter } from "next/navigation";
 import type { AppRouter } from "@/server";
 import type { inferRouterInputs } from "@trpc/server";
 import { trpc } from "../_trpc/client";
 import CheckoutModal from "./CheckoutModal";
 
-type Order = inferRouterInputs<AppRouter>["order"]["create"];
+type NewOrder = inferRouterInputs<AppRouter>["order"]["create"];
+type TransactionData = {
+  qr_code?: string | undefined;
+  qr_code_base64?: string | undefined;
+};
 
 export default function ChekoutForm({
   productId,
@@ -14,10 +19,12 @@ export default function ChekoutForm({
   productId: string;
   productPrice: number;
 }) {
-  const createOrder = trpc.order.create.useMutation();
-
+  // Variables
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [orderData, setOrderData] = useState<Order>({
+  const [orderId, setOrderId] = useState("");
+  const [transactionData, setTransactionData] = useState<TransactionData>();
+  const [orderData, setOrderData] = useState<NewOrder>({
     productId,
     paymentMethod: "pix",
     status: "PENDING",
@@ -27,10 +34,29 @@ export default function ChekoutForm({
     customerPhone: "",
   });
 
+  // trpc methods
+  const createOrder = trpc.order.create.useMutation({
+    onSuccess: (data) => {
+      setOrderId(data.id);
+      setIsModalOpen(true);
+      setTransactionData(data.transaction_data);
+    },
+  });
+  const getOrder = trpc.order.getById.useQuery(orderId, {
+    enabled: Boolean(orderId),
+    refetchInterval: 5000,
+  });
+  const order = getOrder.data;
+
+  // Functions
+  useEffect(() => {
+    if (order?.status === "APPROVED") router.push("/thank-you");
+  }, [router, order]);
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    createOrder.mutate(orderData);
-    setIsModalOpen(true);
+    if (transactionData) setIsModalOpen(true);
+    else createOrder.mutate(orderData);
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -185,6 +211,7 @@ export default function ChekoutForm({
       <CheckoutModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        transactionData={transactionData}
       />
     </div>
   );

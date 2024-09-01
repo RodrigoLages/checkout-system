@@ -1,5 +1,6 @@
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
+import prisma from "@/prisma/prisma";
 const { MERCADO_PAGO_ACCESS_TOKEN, NEXT_PUBLIC_BASE_URL } = process.env;
 
 const api = axios.create({
@@ -9,61 +10,50 @@ const api = axios.create({
   },
 });
 
-type PaymentData = {
-  transaction_amount: number;
-  description: string;
-  payment_method_id: string;
-  notification_url?: string;
-  payer: {
-    email: string;
-    first_name: string;
-    last_name: string;
-    identification: {
-      type: string;
-      number: string;
-    };
-  };
+type OrderData = {
+  productId: string;
+  customerName: string;
+  customerPhone: string;
+  customerCPF: string;
+  customerEmail: string;
+  status: string;
+  paymentMethod: string;
 };
 
-const placeholder: PaymentData = {
-  transaction_amount: 5.0,
-  description: "Compra Teste",
-  payment_method_id: "pix",
-  payer: {
-    email: "email_teste@exemplo.com",
-    first_name: "Nome",
-    last_name: "Sobrenome",
-    identification: {
-      type: "CPF",
-      number: "01234567890",
-    },
-  },
-};
-
-export async function createPayment(paymentData: PaymentData | null) {
+export async function createPayment(orderData: OrderData) {
   try {
-    const pagamentoData = placeholder;
-    pagamentoData.notification_url = `${NEXT_PUBLIC_BASE_URL}/api/trpc/payment.webhook?source_news=webhooks`;
-    console.log(pagamentoData.notification_url);
+    const product = await prisma.product.findUnique({
+      where: { id: orderData.productId },
+    });
+    const paymentData = {
+      transaction_amount: 0.1, //product?.price,
+      description: product?.description,
+      payment_method_id: orderData.paymentMethod,
+      notification_url: `${NEXT_PUBLIC_BASE_URL}/api/trpc/payment.webhook?source_news=webhooks`,
+      payer: {
+        email: orderData.customerEmail,
+        first_name: orderData.customerName,
+        identification: {
+          type: "CPF",
+          number: orderData.customerCPF,
+        },
+      },
+    };
 
-    const respostaPagamento = await api.post("/payments", pagamentoData, {
+    const respostaPagamento = await api.post("/payments", paymentData, {
       headers: {
         "X-Idempotency-Key": uuidv4(),
       },
     });
     const { id, point_of_interaction } = respostaPagamento.data;
+    const {
+      qr_code,
+      qr_code_base64,
+    }: { qr_code?: string; qr_code_base64?: string } =
+      point_of_interaction.transaction_data;
 
     console.log("Pagamento criado com sucesso:", id);
-    console.log(
-      "QR Code disponível em:",
-      point_of_interaction.transaction_data.qr_code
-    );
-    console.log(
-      "Imagem do QR Code:",
-      point_of_interaction.transaction_data.qr_code_base64
-    );
-
-    return { id, point_of_interaction };
+    return { qr_code, qr_code_base64 };
   } catch (error: any) {
     console.error(
       "Erro ao criar pagamento:",
@@ -73,27 +63,28 @@ export async function createPayment(paymentData: PaymentData | null) {
   }
 }
 
-// async function verificarPagamento(id: string) {
-//   try {
-//     const respostaPagamento = await api.get(`/payments/${id}`);
-//     console.log("Detalhes do pagamento:", respostaPagamento.data);
+export async function verificarPagamento(id: string) {
+  try {
+    const respostaPagamento = await api.get(`/payments/${id}`);
+    //console.log("Detalhes do pagamento:", respostaPagamento.data);
 
-//     const status = respostaPagamento.data.status;
-//     console.log("Status do pagamento:", status);
+    const status = respostaPagamento.data.status;
+    console.log("Status do pagamento:", status);
 
-//     if (status === "approved") {
-//       console.log("Pagamento aprovado!");
-//     } else {
-//       console.log("Pagamento ainda não aprovado.");
-//     }
-//   } catch (error: any) {
-//     console.error(
-//       "Erro ao verificar pagamento:",
-//       error.response?.data || error.message
-//     );
-//     throw error;
-//   }
-// }
+    if (status === "approved") {
+      console.log("Pagamento aprovado!");
+    } else {
+      console.log("Pagamento ainda não aprovado.");
+    }
+    return respostaPagamento.data;
+  } catch (error: any) {
+    console.error(
+      "Erro ao verificar pagamento:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
 
 // async function main() {
 //   //const id = await criarPagamento();

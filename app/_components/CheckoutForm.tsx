@@ -45,7 +45,7 @@ export default function ChekoutForm({
   });
   const getOrder = trpc.order.getById.useQuery(orderId, {
     enabled: Boolean(orderId),
-    refetchInterval: 5000,
+    refetchInterval: 5000, // uso de pooling devido ao tempo e simplicidade, mas um websocket seria mais performatico
   });
   const order = getOrder.data;
 

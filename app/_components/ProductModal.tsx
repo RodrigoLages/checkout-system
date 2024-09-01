@@ -67,15 +67,18 @@ export default function ProductModal({
   const handleFileUpload = async (file: File): Promise<string | null> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-  
+
       reader.onload = async () => {
-        const base64String = reader.result?.toString().split(',')[1];
-  
+        const base64String = reader.result?.toString().split(",")[1];
+
         if (base64String) {
           const filename = file.name;
-  
+
           try {
-            const url = await uploadImage.mutateAsync({ file: base64String, filename });
+            const url = await uploadImage.mutateAsync({
+              file: base64String,
+              filename,
+            });
             resolve(url);
           } catch (error) {
             console.error("Error uploading image:", error);
@@ -85,16 +88,15 @@ export default function ProductModal({
           reject(null);
         }
       };
-  
+
       reader.onerror = (error) => {
         console.error("Error reading file:", error);
         reject(null);
       };
-  
+
       reader.readAsDataURL(file);
     });
   };
-  
 
   const handleOutsideClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -122,7 +124,7 @@ export default function ProductModal({
 
   return (
     <div
-      onClick={handleOutsideClick}
+      onMouseDown={handleOutsideClick}
       className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center"
     >
       <div className="w-[408px] h-auto relative bg-white rounded-sm border border-white p-6">

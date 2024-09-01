@@ -62,3 +62,51 @@ export async function createPayment(orderData: OrderData) {
     throw error;
   }
 }
+
+export async function verifyPayment(id: string) {
+  try {
+    const respostaPagamento = await api.get(`/payments/${id}`);
+    //console.log("Detalhes do pagamento:", respostaPagamento.data);
+
+    const status = respostaPagamento.data.status;
+    console.log("Status do pagamento:", status);
+
+    if (status === "approved") {
+      console.log("Pagamento aprovado!");
+    } else {
+      console.log("Pagamento ainda não aprovado.");
+    }
+    return respostaPagamento.data;
+  } catch (error: any) {
+    console.error(
+      "Erro ao verificar pagamento:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+
+export async function requestRefund(paymentId: string, amount?: number) {
+  try {
+    // Data for the refund
+    const refundData = {
+      amount, // The amount is optional; if not provided, the refund will be full.
+    };
+
+    // Request the refund
+    const refundResponse = await api.post(
+      `/payments/${paymentId}/refunds`,
+      refundData
+    );
+
+    console.log("Refund requested successfully:", refundResponse.data);
+
+    return refundResponse.data;
+  } catch (error: any) {
+    console.error(
+      "Error requesting refund:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}

@@ -26,10 +26,10 @@ export async function createPayment(orderData: OrderData) {
       where: { id: orderData.productId },
     });
     const paymentData = {
-      transaction_amount: 0.1, //product?.price,
+      transaction_amount: product?.price,
       description: product?.description,
       payment_method_id: orderData.paymentMethod,
-      notification_url: `${NEXT_PUBLIC_BASE_URL}/api/trpc/payment.webhook`,
+      notification_url: `${NEXT_PUBLIC_BASE_URL}api/trpc/payment.webhook?source_news=webhooks`,
       payer: {
         email: orderData.customerEmail,
         first_name: orderData.customerName,

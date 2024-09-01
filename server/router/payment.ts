@@ -6,17 +6,16 @@ export const paymentRouter = router({
   webhook: procedure.input(z.any()).mutation(async ({ input }) => {
     const paymentId: string = input.data.id.toString();
     if (input.action === "payment.updated") {
-      console.log("entrou no if");
       prisma.order
         .update({
           where: { paymentId },
           data: { status: "APPROVED" },
         })
         .then((res) => {
-          console.log("pdate deu bom");
+          console.log("Order updated");
         })
         .catch((error) => {
-          console.log("update dum, ruim", error);
+          console.log("Update failed: ", error);
         });
     }
     return;

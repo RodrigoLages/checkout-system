@@ -17,12 +17,13 @@ export const orderRouter = router({
       })
     )
     .mutation(async ({ input }) => {
+      const { id, qr_code, qr_code_base64 } = await createPayment(input);
+
       const order = await prisma.order.create({
-        data: input,
+        data: { paymentId: id, ...input },
       });
 
-      const transaction_data = await createPayment(input);
-      return { ...order, transaction_data };
+      return { ...order, transaction_data: { qr_code, qr_code_base64 } };
     }),
 
   getAll: procedure.query(async () => {

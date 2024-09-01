@@ -1,6 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
-import { trpc } from "../_trpc/client";
+import { useState } from "react";
 
 type ModalProps = {
   isOpen: boolean;
@@ -16,7 +15,6 @@ export default function CheckoutModal({
   onClose,
   transactionData,
 }: ModalProps) {
-  const textRef = useRef<HTMLSpanElement>(null);
   const [isClicked, setClicked] = useState(false);
   const dataUrl = `data:image/jpeg;base64,${transactionData?.qr_code_base64}`;
 

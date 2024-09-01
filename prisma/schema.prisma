@@ -35,6 +35,7 @@ model Order {
   customerEmail String
   status        OrderStatus
   paymentMethod String
+  paymentId     String    @unique
   createdAt     DateTime  @default(now())
 
   @@map("orders")

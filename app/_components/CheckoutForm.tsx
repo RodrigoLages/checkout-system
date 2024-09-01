@@ -5,6 +5,7 @@ import type { AppRouter } from "@/server";
 import type { inferRouterInputs } from "@trpc/server";
 import { trpc } from "../_trpc/client";
 import CheckoutModal from "./CheckoutModal";
+import isValidCPF from "@/util/isValidCPF";
 
 type NewOrder = inferRouterInputs<AppRouter>["order"]["create"];
 type TransactionData = {
@@ -56,7 +57,10 @@ export default function ChekoutForm({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (transactionData) setIsModalOpen(true);
-    else createOrder.mutate(orderData);
+    if (!isValidCPF(orderData.customerCPF)) {
+      return alert("Insira um CPF válido");
+    }
+    createOrder.mutate(orderData);
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -129,9 +133,8 @@ export default function ChekoutForm({
               type="text"
               name="customerCPF"
               required
-              pattern="^\d{11}$"
               className="w-full bg-white/90 rounded-[10px] border border-[#e6e6e6] p-3 text-[#3e3e3e] text-sm font-light"
-              placeholder="00 0000 0000"
+              placeholder="000.000.000-00"
               onChange={handleChange}
             />
           </div>

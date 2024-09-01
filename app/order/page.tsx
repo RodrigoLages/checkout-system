@@ -26,7 +26,7 @@ export default function Order() {
           </button>
         </header>
         {orders ? (
-          <div className="flex-1 p-4">
+          <div className="flex-1 p-4 overflow-y-auto">
             <div className="flex items-center p-4 space-x-5">
               <h1 className="text-gray-800 text-2xl font-semibold">Vendas</h1>
             </div>

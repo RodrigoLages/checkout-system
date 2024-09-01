@@ -29,7 +29,7 @@ export async function createPayment(orderData: OrderData) {
       transaction_amount: 0.1, //product?.price,
       description: product?.description,
       payment_method_id: orderData.paymentMethod,
-      notification_url: `${NEXT_PUBLIC_BASE_URL}/api/trpc/payment.webhook?source_news=webhooks`,
+      notification_url: `${NEXT_PUBLIC_BASE_URL}/api/trpc/payment.webhook`,
       payer: {
         email: orderData.customerEmail,
         first_name: orderData.customerName,
@@ -80,6 +80,56 @@ export async function verificarPagamento(id: string) {
   } catch (error: any) {
     console.error(
       "Erro ao verificar pagamento:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+
+  async function requestRefund(paymentId: string, amount?: number) {
+    try {
+      // Data for the refund
+      const refundData = {
+        amount, // The amount is optional; if not provided, the refund will be full.
+      };
+
+      // Request the refund
+      const refundResponse = await api.post(
+        `/payments/${paymentId}/refunds`,
+        refundData
+      );
+
+      console.log("Refund requested successfully:", refundResponse.data);
+
+      return refundResponse.data;
+    } catch (error: any) {
+      console.error(
+        "Error requesting refund:",
+        error.response?.data || error.message
+      );
+      throw error;
+    }
+  }
+}
+
+export async function requestRefund(paymentId: string, amount?: number) {
+  try {
+    // Data for the refund
+    const refundData = {
+      amount, // The amount is optional; if not provided, the refund will be full.
+    };
+
+    // Request the refund
+    const refundResponse = await api.post(
+      `/payments/${paymentId}/refunds`,
+      refundData
+    );
+
+    console.log("Refund requested successfully:", refundResponse.data);
+
+    return refundResponse.data;
+  } catch (error: any) {
+    console.error(
+      "Error requesting refund:",
       error.response?.data || error.message
     );
     throw error;

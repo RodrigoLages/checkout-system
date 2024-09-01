@@ -20,9 +20,8 @@ export const orderRouter = router({
       const { id, qr_code, qr_code_base64 } = await createPayment(input);
 
       const order = await prisma.order.create({
-        data: { paymentId: id, ...input },
+        data: { paymentId: id.toString(), ...input },
       });
-
       return { ...order, transaction_data: { qr_code, qr_code_base64 } };
     }),
 
